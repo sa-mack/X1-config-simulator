@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>X1 CONFIG SIMULATOR</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="main-container">
-
+<div class="simulation-container">
+    <div class="power-and-crew">
+    <p id="reactor-output">POWER OUTPUT: </p>
+    <p id="total-power">POWER CONSUMPTION: </p>
+    <p id="total-crew-capacity">CREW CAPACITY: </p>
+    <p id="total-crew-required">CREW REQUIRED: </p>
+    </div>
+    <div class="frame-simulation" id="frame-simulation">
+        <img src="" alt="" id="frame-image">
+    </div>
+</div>
         <div class="ship-container">
             <div class="frame-container">
                 <p class="component-title">FRAME</p>
@@ -35,7 +45,7 @@
             </div>
         </div>
     <div class="control-panel">
-        <label>SELECT FRAME</label>
+        <label class="frame-selection" id="frame-label">SELECT FRAME TO BEGIN</label>
         <select id="frame-select"></select>
     
     </div>

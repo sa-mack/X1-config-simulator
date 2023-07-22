@@ -8,34 +8,66 @@ export class Ship {
     this.mounts = new Array(frame.mountingPoints).fill(null);
   }
 
-  calculateTotalPower() {
-    const reactorPower = this.reactor ? this.reactor.powerOutput : 0;
-    const enginePower = this.engine ? this.engine.powerRequired : 0;
-    const modulesPower = this.modules.reduce(
-      (totalPower, module) => totalPower + (module ? module.powerRequired : 0),
-      0
-    );
-    const mountsPower = this.mounts.reduce(
-      (totalPower, mount) => totalPower + (mount ? mount.powerRequired : 0),
-      0
-    );
+  setName(name){
+    this.name = name;
+  }
 
-    return reactorPower - enginePower - modulesPower - mountsPower;
+  calculateTotalPower() {
+    const enginePower = this.engine ? this.engine.powerRequired : 0;
+    const framePower = this.frame ? this.frame.powerRequired : 0;
+    console.log("genny", enginePower);
+
+    const moduleSlots = this.frame.moduleSlots;
+    const mountingPoints = this.frame.mountingPoints;
+    let modulesPower = 0;
+    let mountsPower = 0;
+    for (let i = 0; i < moduleSlots; i++) {
+      if (this.modules[i] !== null) {
+        modulesPower += this.modules[i].powerRequired;
+      }
+    }
+      for (let j = 0; j < mountingPoints; j++) {
+        if (this.mounts[j] !== null) {
+          mountsPower += this.mounts[j].powerRequired;
+        }
+      }
+
+    const total =  enginePower + framePower + modulesPower + mountsPower;
+    return total;
   }
 
   calculateTotalCrewRequired() {
     const reactorCrew = this.reactor ? this.reactor.crewRequired : 0;
     const engineCrew = this.engine ? this.engine.crewRequired : 0;
-    const modulesCrew = this.modules.reduce(
-      (totalCrew, module) => totalCrew + module.crewRequired,
-      0
-    );
-    const mountsCrew = this.mounts.reduce(
-      (totalCrew, mount) => totalCrew + mount.crewRequired,
-      0
-    );
+    const frameCrew = this.frame ? this.frame.crewRequired : 0;
+    const moduleSlots = this.frame.moduleSlots;
+    const mountingPoints = this.frame.mountingPoints;
+    let modulesCrew = 0;
+    let mountsCrew = 0;
+    for (let i = 0; i < moduleSlots; i++) {
+      if (this.modules[i] !== null) {
+        modulesCrew += this.modules[i].crewRequired;
+      }
+    }
+    for (let j = 0; j < mountingPoints; j++) {
+      if (this.mounts[j] !== null) {
+        mountsCrew += this.mounts[j].crewRequired;
+      }
+    }
 
-    return reactorCrew + engineCrew + modulesCrew + mountsCrew;
+    return reactorCrew + engineCrew + frameCrew + modulesCrew + mountsCrew;
+  }
+
+  calculateTotalCrewCapacity() {
+    let totalCrewCapacity = 0;
+  
+    for (const module of this.modules) {
+      if (module && module.symbol === "MODULE_CREW_QUARTERS_I") {
+        totalCrewCapacity += module.crewCapacity;
+      }
+    }
+  
+    return totalCrewCapacity;
   }
 
   attachReactor(reactor) {
@@ -80,23 +112,27 @@ export class Ship {
       if (this.modules[slot] === null) {
         const slotsNeeded = module.slotsRequired;
         if (this.checkSlotsAvailable(slot, slotsNeeded)) {
-          const potentialPower =
-            this.calculateTotalPower() + module.powerRequired;
-          if (potentialPower <= this.reactor.powerOutput) {
-            for (let i = 0; i < slotsNeeded; i++) {
-              this.modules[slot + i] = module;
-            }
-            console.log("Module attached.");
-            return true;
-          } else {
-            console.log("Adding this module will exceed the power limits.");
+          // const potentialPower =
+          //   this.calculateTotalPower() + module.powerRequired;
+          // if (potentialPower <= this.reactor.powerOutput) {
+          //   console.log("good attach", potentialPower);
+          // } else {
+          //   console.log("Adding this module will exceed the power limits. ATTACHED ANYWAY");
+          // }
+          for (let i = 0; i < slotsNeeded; i++) {
+            this.modules[slot + i] = module;
           }
+          const newPower = this.calculateTotalPower();
+          console.log("Module attached.", newPower);
+          return true;
         } else {
           console.log("Not enough contiguous slots available.");
         }
       } else {
         console.log("Slot is already occupied.");
+
       }
+
     } else {
       console.log("Invalid slot number.");
     }
@@ -112,17 +148,22 @@ export class Ship {
     return true;
   }
 
-  attachMount(mount) {
-    if (this.mounts.length < this.frame.mountingPoints) {
-      const potentialPower = this.calculateTotalPower() + mount.powerRequired;
-      if (potentialPower <= this.reactor.powerOutput) {
-        this.mounts.push(mount);
-      } else {
-        console.log("Adding this mount will exceed the power limits.");
-      }
+  attachMount(mount, point) {
+    if (point >= 0 && point < this.frame.mountingPoints) {
+      // const potentialPower = this.calculateTotalPower() + mount.powerRequired;
+      // if (potentialPower <= this.reactor.powerOutput) {
+      //   console.log("good attach");
+      // } else {
+      //   console.log("OVER POWER LIMIT BUT WE DO IT ANYWAY");
+      // }
+      this.mounts[point] = mount;
+      const newPower = this.calculateTotalPower();
+      console.log("Mount attached.", newPower);
+      return true;
     } else {
-      console.log("No more mounting points available.");
+      console.log("Invalid mounting point index.");
     }
+    return false;
   }
 
   removeModule(module) {
@@ -143,3 +184,4 @@ export class Ship {
     }
   }
 }
+

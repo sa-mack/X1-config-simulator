@@ -4,12 +4,14 @@ body {
     padding: 0;
 }
 
+
+
 .main-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-family: "Share Tech Mono";
+    font-family: "Share Tech Mono", monospace;
     font-size: .8em;
     color: white;
 
@@ -24,27 +26,23 @@ body {
 }
 
 .ship-container div {
-    border: dotted 1px #4c33f1;
-    border-radius: 5px;
     width: 15vw;
 }
 
-/* .mounts, .modules, .engine, .reactor, .frame {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 1%;
-} */
+.frame-selection {
+    font-size: 1.5em;
+}
+
+.mounts, .modules, .engine, .reactor, .frame {
+border: 1px dotted rgb(66, 26, 246);
+}
 
 
 select {
-    /* Reset Select */
     appearance: none;
     outline: 0;
     border: 0;
     box-shadow: none;
-    /* Personalize */
     flex: 1;
     padding: 0 1em;
     color: #fff;
