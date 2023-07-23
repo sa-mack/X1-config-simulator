@@ -10,6 +10,7 @@ export class Module {
     this.cargoCapacity = options.cargoCapacity || 0;
     this.crewCapacity = options.crewCapacity || 0;
     this.passengerCapacity = options.passengerCapacity || 0;
+    this.envoyCapacity = options.envoyCapacity || 0;
     this.description = options.description || "";
     this.refiningTargets = options.refiningTargets || [];
   }
@@ -66,6 +67,7 @@ export const MODULE_MINERAL_PROCESSOR_I = new Module({
     moduleName: "Warp Drive II",
     powerRequired: 5,
     crewRequired: 8,
+    warpRange: 4000,
     slotsRequired: 2,
     description:
       "An advanced warp drive that allows for longer-range interstellar travel with improved reliability.",
@@ -126,7 +128,7 @@ export const MODULE_MINERAL_PROCESSOR_I = new Module({
       "A specialized module that can refine raw ores into usable metals and other materials.",
   });
 
-  export const modules = [MODULE_MINERAL_PROCESSOR_I, MODULE_CARGO_HOLD_I, MODULE_CREW_QUARTERS_I, MODULE_JUMP_DRIVE_I, MODULE_WARP_DRIVE_I, MODULE_WARP_DRIVE_II, MODULE_PASSENGER_CABIN_I, MODULE_ENVOY_QUARTERS_I, MODULE_SCIENCE_LAB_I, MODULE_SHIELD_GENERATOR_I];
+  export const modules = [MODULE_MINERAL_PROCESSOR_I, MODULE_CARGO_HOLD_I, MODULE_CREW_QUARTERS_I, MODULE_JUMP_DRIVE_I, MODULE_WARP_DRIVE_I, MODULE_WARP_DRIVE_II, MODULE_ORE_REFINERY_I, MODULE_PASSENGER_CABIN_I, MODULE_ENVOY_QUARTERS_I, MODULE_SCIENCE_LAB_I, MODULE_SHIELD_GENERATOR_I];
 
     // let MODULE_MICRO_REFINERY_I;
     // let MODULE_FUEL_REFINERY_I;

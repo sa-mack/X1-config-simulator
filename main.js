@@ -11,9 +11,22 @@ const engineEl = document.getElementById("engine");
 const moduleEl = document.getElementById("modules");
 const mountEl = document.getElementById("mounts");
 const frameList = document.getElementById("frame-select");
+const frameImg = document.getElementById("frame-image");
+
+const jumpRange = document.getElementById("jump-range");
+const warpRange = document.getElementById("warp-range");
+const cargoCapacity = document.getElementById("cargo-capacity");
+const passengerCapacity = document.getElementById("passenger-capacity");
+const envoyCapacity = document.getElementById("envoy-capacity");
+const refiningTargets = document.getElementById("refining-targets");
+
+const oreStrength = document.getElementById("ore-mining");
+const gasStrength = document.getElementById("gas-mining");
+const surveysProduced = document.getElementById("survey-number");
+const surveyDeposits = document.getElementById("survey-deposits");
+const sensorStrength = document.getElementById("sensor-strength");
 
 const hangar = {
-
   ship: null,
   setShip(ship) {
     this.ship = ship;
@@ -23,7 +36,7 @@ const hangar = {
   },
   getShip() {
     return this.ship;
-  }
+  },
 };
 
 function populateModules(moduleSlot) {
@@ -31,12 +44,12 @@ function populateModules(moduleSlot) {
   modulesList.classList.add(`moduleSelect-${moduleSlot}`);
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[NO MODULE]";
+  empty.text = "[    ]";
   modulesList.appendChild(empty);
   for (const module of modules) {
     const option = document.createElement("option");
     option.value = module.symbol;
-    option.text = module.symbol;
+    option.text = `${module.moduleName} [ ${module.slotsRequired} ]`;
     modulesList.appendChild(option);
   }
 
@@ -47,12 +60,12 @@ function populateMounts(mountingPoint) {
   mountsList.classList.add(`mountSelect-${mountingPoint}`);
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[NO MOUNT]";
+  empty.text = "[    ]";
   mountsList.appendChild(empty);
   for (const mount of mounts) {
     const option = document.createElement("option");
     option.value = mount.symbol;
-    option.text = mount.symbol;
+    option.text = mount.mountName;
     mountsList.appendChild(option);
   }
 
@@ -61,12 +74,12 @@ function populateMounts(mountingPoint) {
 function populateFrames() {
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[NO FRAME]";
+  empty.text = "[ SELECT FRAME TO BEGIN ]";
   frameList.appendChild(empty);
   for (const frame of frames) {
     const option = document.createElement("option");
-    option.value = frame.symbol; 
-    option.text = frame.symbol;
+    option.value = frame.symbol;
+    option.text = frame.frameName;
     frameList.appendChild(option);
   }
 }
@@ -79,7 +92,7 @@ function populateReactors() {
   for (const reactor of reactors) {
     const option = document.createElement("option");
     option.value = reactor.symbol;
-    option.text = reactor.symbol;
+    option.text = reactor.reactorName;
     reactorList.appendChild(option);
   }
   return reactorList;
@@ -93,7 +106,7 @@ function populateEngines() {
   for (const engine of engines) {
     const option = document.createElement("option");
     option.value = engine.symbol;
-    option.text = engine.symbol;
+    option.text = engine.engineName;
     engineList.appendChild(option);
   }
 
@@ -130,8 +143,6 @@ function getFrameDetails() {
   return frameDetails;
 }
 function handleFrameSelection() {
-  const frameLabel = document.getElementById("frame-label");
-  frameLabel.textContent = "";
   frameEl.innerHTML = "";
   const selection = frameList.value;
   const selectedFrame = frames.find((frame) => frame.symbol === selection);
@@ -142,15 +153,16 @@ function handleFrameSelection() {
 
   const frameDetails = getFrameDetails();
   frameEl.appendChild(frameDetails);
+
+  if (ship.reactor == null) {
+    updateReactorOutput(0);
+  } else {
+    updateReactorOutput(ship.reactor.powerOutput);
+  }
   updateCrewCapacity(ship.calculateTotalCrewCapacity());
   updateTotalPower(ship.calculateTotalPower());
   updateCrewRequired(ship.calculateTotalCrewRequired());
-  if (ship.reactor == null) {
-    updateReactorOutput(0);
-  }
-  else {
-  updateReactorOutput(ship.reactor.powerOutput);
-  }
+  setFrameImgSrc();
 
   //   const REACTOR_FISSION = reactors.find(
   //     (reactor) => reactor.symbol === "REACTOR_FISSION_I"
@@ -203,7 +215,6 @@ function handleFrameSelection() {
     attachMountsListener(mountOptions, i);
   }
 }
-
 function getReactorDetails() {
   const ship = hangar.getShip();
 
@@ -228,7 +239,6 @@ function getReactorDetails() {
   reactorDetails.appendChild(reactorDesc);
   return reactorDetails;
 }
-
 function getEngineDetails() {
   const ship = hangar.getShip();
 
@@ -245,12 +255,11 @@ function getEngineDetails() {
     "<br>";
   engineDetails.appendChild(engineSpecs);
   const engineDesc = document.createElement("p");
-  engineDesc.classList.add("engine-details");
+  // engineDesc.classList.add("engine-details");
   engineDesc.textContent = ship.engine.description;
   engineDetails.appendChild(engineDesc);
   return engineDetails;
 }
-
 function getModuleDetails(selectedMod, slot) {
   // const ship = hangar.getShip();
   // const selectedMod = ship.modules[slot];
@@ -266,7 +275,6 @@ function getModuleDetails(selectedMod, slot) {
 
   return moduleDetails;
 }
-
 function getMountDetails(selectedMount, point) {
   const mountDetails = document.createElement("div");
   mountDetails.classList.add(`mount-details`);
@@ -274,10 +282,9 @@ function getMountDetails(selectedMount, point) {
   mountDetails.innerHTML =
     `PWR[${selectedMount.powerRequired}]` +
     `CREW[${selectedMount.crewRequired}]`;
-    return mountDetails;
+  return mountDetails;
 }
-
-function resetShipAndFrame() {
+function resetSimulation() {
   frameEl.innerHTML = "";
   reactorEl.innerHTML = "";
   engineEl.innerHTML = "";
@@ -314,12 +321,10 @@ function attachReactorListener(reactorList) {
     const reactorDetails = getReactorDetails();
     reactorEl.appendChild(reactorDetails);
     updateReactorOutput(selectedReactor.powerOutput);
+    updateTotalPower(ship.calculateTotalPower());
     updateCrewRequired(ship.calculateTotalCrewRequired());
-
-    
   });
 }
-
 function attachEngineListener(engineList) {
   engineList.addEventListener("change", function () {
     const existingElements = document.querySelectorAll(".engine-details");
@@ -343,32 +348,169 @@ function attachEngineListener(engineList) {
 
     updateTotalPower(ship.calculateTotalPower());
     updateCrewRequired(ship.calculateTotalCrewRequired());
-
-
   });
 }
+function updateMountEffects() {
+  const effectsContainer = document.getElementById("mount-effects");
+  effectsContainer.style.display = "block";
+  const existing = document.querySelectorAll(".deposit-targets");
+  existing.forEach((element) => element.remove());
+  const ship = hangar.getShip();
+  const mounts = ship.mounts;
+  let sensor = 0;
+  let miningOre = 0;
+  let miningGas = 0;
+  let surveys = 0;
+  let depositsLength = 0;
+  let deposits = [];
+  sensorStrength.innerHTML = "";
+  oreStrength.innerHTML = "";
+  gasStrength.innerHTML = "";
+  surveysProduced.innerHTML = "";
+  surveyDeposits.innerHTML = "";
+  for (const mount of mounts) {
+    if (mount !== null) {
+      miningOre += parseInt(mount.miningStrengthOre) || 0;
+      miningGas += parseInt(mount.miningStrengthGas) || 0;
+      surveys += parseInt(mount.surveysProduced) || 0;
+      sensor += parseInt(mount.sensorStrength) || 0;
+      if (mount.deposits.length > 0) {
+        if (mount.deposits.length > depositsLength) {
+          depositsLength = mount.deposits.length;
+        }
+        for (const deposit of mount.deposits) {
+          deposits.push(deposit.replace(/_/g, " "));
+        }
+      }
+    }
+  }
+  sensorStrength.textContent = parseInt(sensor);
 
+const modules = ship.modules;
+const filteredModules = modules.filter(module => module !== null);
+const mineralProcessor = filteredModules.find(module => module.symbol === "MODULE_MINERAL_PROCESSOR_I");
+if (mineralProcessor || miningOre == 0) {
+  oreStrength.textContent = parseInt(miningOre);
+  oreStrength.style.color = "#f4eee3";
+}
+else {
+  oreStrength.textContent = "[EQUIP MINERAL PROCESSOR]";
+  oreStrength.style.color = "#df5337";
+}
+
+  gasStrength.textContent = parseInt(miningGas);
+  surveysProduced.textContent = parseInt(surveys);
+  surveyDeposits.textContent = `${depositsLength} / 14`;
+
+  const depositTargets = document.createElement("div");
+  depositTargets.classList.add("deposit-targets");
+  for (const deposit of deposits) {
+    depositTargets.innerHTML += `░ ${deposit}<br>`;
+  }
+  effectsContainer.appendChild(depositTargets);
+}
 function attachMountsListener(mountsList, point) {
   console.log("point in list", point);
   mountsList.addEventListener("change", function () {
-
-    // const existingElements = document.querySelectorAll(`.point-${point}`);
-    // existingElements.forEach((element) => element.remove());
+    const existingElements = document.querySelectorAll(`.point-${point}`);
+    existingElements.forEach((element) => element.remove());
 
     const ship = hangar.getShip();
     console.log("the ship", ship);
     const selection = mountsList.value;
+
+    if (selection === "") {
+
+
+      ship.mounts[point] = null;
+      console.log("removed mount", ship);
+
+      updateTotalPower(ship.calculateTotalPower());
+      updateCrewRequired(ship.calculateTotalCrewRequired());
+      updateCrewCapacity(ship.calculateTotalCrewCapacity());
+      updateMountEffects();
+      updateModuleEffects();
+    } else {
     const selectedMount = mounts.find((mount) => mount.symbol === selection);
 
     const attached = ship.attachMount(selectedMount, point);
     if (attached) {
-    console.log("attached!");
-    const mountDetails = getMountDetails(selectedMount, point);
-    mountsList.parentNode.insertBefore(mountDetails, mountsList.nextSibling);
-    updateTotalPower(ship.calculateTotalPower());
-    updateCrewRequired(ship.calculateTotalCrewRequired());
-    }
+      console.log("attached!");
+      const mountDetails = getMountDetails(selectedMount, point);
+      mountsList.parentNode.insertBefore(mountDetails, mountsList.nextSibling);
+      updateTotalPower(ship.calculateTotalPower());
+      updateCrewRequired(ship.calculateTotalCrewRequired());
+      updateMountEffects();
+      updateModuleEffects();
+    }}
   });
+}
+function updateModuleEffects() {
+  const existing = document.querySelectorAll(".refining-targets");
+  existing.forEach((element) => element.remove());
+  const effectsContainer = document.getElementById("module-effects");
+  const ship = hangar.getShip();
+  const modules = ship.modules;
+  console.log("SHIP", ship);
+  let cargo = 0;
+  let passengers = 0;
+  let envoys = 0;
+  let warp = 0;
+  let jump = 0;
+  let refinings = [];
+  cargoCapacity.innerHTML = "";
+  passengerCapacity.innerHTML = "";
+  envoyCapacity.innerHTML = "";
+  warpRange.innerHTML = "";
+  jumpRange.innerHTML = "";
+  refiningTargets.innerHTML = "";
+
+  let currentSlot = 0;
+  for (let i = 0; i < modules.length; i++) {
+    if (modules[i] == null) {
+      currentSlot++;
+      continue;
+    }
+
+    const slotsReq = modules[i].slotsRequired;
+    if (slotsReq > 1) {
+      i = i + (slotsReq - 1);
+    }
+
+    cargo += parseInt(modules[i].cargoCapacity) || 0;
+    passengers += parseInt(modules[i].passengerCapacity) || 0;
+    envoys += parseInt(modules[i].envoyCapacity) || 0;
+    warp += parseInt(modules[i].warpRange) || 0;
+    jump += parseInt(modules[i].jumpRange) || 0;
+
+    if (modules[i].refiningTargets.length > 0) {
+      for (const target of modules[i].refiningTargets) {
+        console.log("target", target);
+        refinings.push(target.replace(/_/g, " "));
+      }
+    }
+    if (i < currentSlot) {
+      i = currentSlot;
+    }
+  }
+
+  const refiningsContainer = document.createElement("div");
+  refiningsContainer.classList.add("refining-targets");
+  for (const refine of refinings) {
+    refiningsContainer.innerHTML += `░ ${refine}<br>`;
+  }
+  console.log(refiningsContainer);
+  effectsContainer.appendChild(refiningsContainer);
+
+
+
+
+  
+  cargoCapacity.textContent = parseInt(cargo);
+  passengerCapacity.textContent = parseInt(passengers);
+  envoyCapacity.textContent = parseInt(envoys);
+  warpRange.textContent = parseInt(warp);
+  jumpRange.textContent = parseInt(jump);
 }
 
 function attachModulesListener(modulesList, slot) {
@@ -380,179 +522,92 @@ function attachModulesListener(modulesList, slot) {
 
     const selection = modulesList.value;
     if (selection === "") {
-      // need to remove module from ship when empty option is selected
       const currentModule = ship.modules[slot];
-      console.log("cur", currentModule);
-      const currentModuleSlots = currentModule.slotsRequired;
-      for (let i = 0; i < currentModuleSlots; i++) {
+      const slotsReq = currentModule.slotsRequired;
+      for (let i = 0; i < slotsReq; i++) {
         ship.modules[slot + i] = null;
       }
-      // ship.removeModule(slot);
-
-    }
-    else {
-    const selectedModule = modules.find(
-      (module) => module.symbol === selection
-    );
-    
-    const attached = ship.attachModule(selectedModule, slot);
-    
-    if (attached) {
-      const moduleDetails = getModuleDetails(selectedModule, slot);
-
-      modulesList.parentNode.insertBefore(
-        moduleDetails,
-        modulesList.nextSibling
-      );
       updateTotalPower(ship.calculateTotalPower());
       updateCrewRequired(ship.calculateTotalCrewRequired());
       updateCrewCapacity(ship.calculateTotalCrewCapacity());
+      updateModuleEffects();
+      updateMountEffects();
+    } else {
+      const selectedModule = modules.find(
+        (module) => module.symbol === selection
+      );
+
+      const attached = ship.attachModule(selectedModule, slot);
+
+      if (attached) {
+        const moduleDetails = getModuleDetails(selectedModule, slot);
+        modulesList.parentNode.insertBefore(
+          moduleDetails,
+          modulesList.nextSibling
+        );
+        updateTotalPower(ship.calculateTotalPower());
+        updateCrewRequired(ship.calculateTotalCrewRequired());
+        updateCrewCapacity(ship.calculateTotalCrewCapacity());
+        updateModuleEffects();
+        updateMountEffects();
+      } else {
+        modulesList.value = "";
+        console.log("needle");
+      }
     }
-    else {
-      // select element return to empty option
-      modulesList.value = "";
-    }
-  }
   });
 }
 
-function updateTotalPower (power){
-  const totalPower = document.getElementById("total-power");
-  totalPower.textContent = `TOTAL POWER CONSUMPTION: ${power}`;
-}
-
-function updateReactorOutput (output){
-  const reactorOutput = document.getElementById("reactor-output");
-  if (output > 0) {
-    reactorOutput.textContent = `POWER OUTPUT: ${output}`;
-    reactorOutput.style.color = "white";
-  }
-  else {
-    reactorOutput.textContent = "[NO REACTOR]";
-    reactorOutput.style.color = "red";
-  }
-}
-function updateCrewRequired (crew){
-  const crewRequired = document.getElementById("total-crew-required");
-  crewRequired.textContent = `CREW REQUIRED: ${crew}`;
-}
-
-function updateCrewCapacity (capacity) {
+const reactorOutput = document.getElementById("reactor-output");
+const totalPower = document.getElementById("total-power");
+const crewRequired = document.getElementById("total-crew-required");
 const crewCapacity = document.getElementById("total-crew-capacity");
-crewCapacity.textContent = `CREW CAPACITY: ${capacity}`;
 
+function updateTotalPower(power) {
+  totalPower.textContent = `${power}`;
+  const powerOut = reactorOutput.textContent;
+  if (powerOut < power || powerOut === "[NO REACTOR]") {
+    totalPower.style.color = "#df5337";
+  } else {
+    totalPower.style.color = "white";
+  }
 }
 
-// const miner = frames.find((frame) => frame.symbol === "FRAME_MINER");
-// const drone = frames.find((frame) => frame.symbol === "FRAME_DRONE");
-// const heavyFreight = frames.find((frame) => frame.symbol === "FRAME_HEAVY_FREIGHTER");
-// const lightFreight = frames.find((frame) => frame.symbol === "FRAME_LIGHT_FREIGHTER");
-// const frigate = frames.find((frame) => frame.symbol === "FRAME_FRIGATE");
-// const interceptor = frames.find((frame) => frame.symbol === "FRAME_INTERCEPTOR");
-// const explorer = frames.find((frame) => frame.symbol === "FRAME_EXPLORER");
-// const shuttle = frames.find((frame) => frame.symbol === "FRAME_SHUTTLE");
-// const probe = frames.find((frame) => frame.symbol === "FRAME_PROBE");
+function updateReactorOutput(output) {
+  if (output > 0) {
+    reactorOutput.textContent = `${output}`;
+    reactorOutput.style.color = "white";
+  } else {
+    reactorOutput.textContent = "[NO REACTOR]";
+    reactorOutput.style.color = "#df5337";
+  }
+}
+function updateCrewRequired(crew) {
+  const ship = hangar.getShip();
+  const crewCapacity = ship.calculateTotalCrewCapacity();
+  crewRequired.textContent = `${crew}`;
+  if (crew > crewCapacity) {
+    crewRequired.style.color = "#df5337";
+  } else {
+    crewRequired.style.color = "white";
+  }
+}
 
-// const fission = reactors.find((reactor) => reactor.symbol === "REACTOR_FISSION_I");
-// const fusion = reactors.find((reactor) => reactor.symbol === "REACTOR_FUSION_I");
-// const solar = reactors.find((reactor) => reactor.symbol === "REACTOR_SOLAR_I");
-// const chemical = reactors.find((reactor) => reactor.symbol === "REACTOR_CHEMICAL_I");
+function updateCrewCapacity(capacity) {
+  const ship = hangar.getShip();
+  const crewRequired = ship.calculateTotalCrewRequired();
 
-// const ion1 = engines.find((engine) => engine.symbol === "ENGINE_ION_DRIVE_I");
-// const ion2 = engines.find((engine) => engine.symbol === "ENGINE_ION_DRIVE_II");
-// const impulse = engines.find((engine) => engine.symbol === "ENGINE_IMPULSE_DRIVE_I");
-
-// const laser1 = mounts.find((mount) => mount.symbol === "MOUNT_MINING_LASER_I");
-// const laser2 = mounts.find((mount) => mount.symbol === "MOUNT_MINING_LASER_II");
-// const laser3 = mounts.find((mount) => mount.symbol === "MOUNT_MINING_LASER_III");
-// const surveyor1 = mounts.find((mount) => mount.symbol === "MOUNT_SURVEYOR_I");
-// const surveyor2 = mounts.find((mount) => mount.symbol === "MOUNT_SURVEYOR_II");
-// const surveyor3 = mounts.find((mount) => mount.symbol === "MOUNT_SURVEYOR_II");
-// const sensor1 = mounts.find((mount) => mount.symbol === "MOUNT_SENSOR_ARRAY_I");
-// const sensor2 = mounts.find((mount) => mount.symbol === "MOUNT_SENSOR_ARRAY_II");
-// const cannon = mounts.find((mount) => mount.symbol === "MOUNT_LASER_CANNON_I");
-
-// const cargoHold = modules.find((module) => module.symbol === "MODULE_CARGO_HOLD_I");
-// const crewQuarters = modules.find((module) => module.symbol === "MODULE_CREW_QUARTERS_I");
-// const passengerCabin = modules.find((module) => module.symbol === "MODULE_PASSENGER_CABIN_I");
-// const envoyQuarters = modules.find((module) => module.symbol === "MODULE_ENVOY_QUARTERS_I");
-// const scienceLab = modules.find((module) => module.symbol === "MODULE_SCIENCE_LAB_I");
-// const shieldGenerator = modules.find((module) => module.symbol === "MODULE_SHIELD_GENERATOR_I");
-// const oreRefinery = modules.find((module) => module.symbol === "MODULE_ORE_REFINERY_I");
-// const mineralProcessor = modules.find((module) => module.symbol === "MODULE_MINERAL_PROCESSOR_I");
-// const jump1 = modules.find((module) => module.symbol === "MODULE_JUMP_DRIVE_I");
-// const warp1 = modules.find((module) => module.symbol === "MODULE_WARP_DRIVE_I");
-// const warp2 = modules.find((module) => module.symbol === "MODULE_WARP_DRIVE_II");
-
-// const defaultOreHound = new Ship(miner);
-// defaultOreHound.attachReactor(fission);
-// defaultOreHound.attachEngine(ion1);
-// defaultOreHound.attachModule(mineralProcessor, 0);
-// defaultOreHound.attachModule(cargoHold, 2);
-// defaultOreHound.attachModule(cargoHold, 3);
-// defaultOreHound.attachModule(crewQuarters, 4);
-// defaultOreHound.attachMount(laser2, 0);
-// defaultOreHound.attachMount(surveyor1, 1);
-// defaultOreHound.setName("Ore Hound");
-// console.log("HALLLLLLLP", defaultOreHound);
-
-// const miningDrone = new Ship(drone);
-// miningDrone.attachReactor(chemical);
-// miningDrone.attachEngine(impulse);
-// miningDrone.attachModule(mineralProcessor, 0);
-// miningDrone.attachModule(cargoHold, 2);
-// miningDrone.attachMount(laser1, 0);
-
-// const heavyFreighter = new Ship(heavyFreight);
-// heavyFreighter.attachReactor(fusion);
-// heavyFreighter.attachEngine(ion2);
-// heavyFreighter.attachModule(cargoHold, 0);
-// heavyFreighter.attachModule(cargoHold, 1);
-// heavyFreighter.attachModule(cargoHold, 2);
-// heavyFreighter.attachModule(cargoHold, 3);
-// heavyFreighter.attachModule(cargoHold, 4);
-// heavyFreighter.attachModule(cargoHold, 5);
-// heavyFreighter.attachModule(crewQuarters, 6);
-// heavyFreighter.attachModule(crewQuarters, 7);
-// heavyFreighter.attachModule(crewQuarters, 8);
-// heavyFreighter.attachModule(crewQuarters, 9);
-// heavyFreighter.attachModule(warp2, 10);
-
-// const lightFreighter = new Ship(lightFreight);
-// lightFreighter.attachReactor(chemical);
-// lightFreighter.attachEngine(ion1);
-// lightFreighter.attachModule(cargoHold, 0);
-// lightFreighter.attachModule(cargoHold, 1);
-// lightFreighter.attachModule(cargoHold, 2);
-// lightFreighter.attachModule(cargoHold, 3);
-// lightFreighter.attachModule(crewQuarters, 4);
-// lightFreighter.attachModule(crewQuarters, 5);
-// lightFreighter.attachMount(surveyor1, 0);
-
-// const defaultExplorer = new Ship(explorer);
-// defaultExplorer.attachReactor(fusion);
-// defaultExplorer.attachEngine(ion2);
-// defaultExplorer.attachModule(cargoHold, 0);
-// defaultExplorer.attachModule(crewQuarters, 1);
-// defaultExplorer.attachModule(crewQuarters, 2);
-// defaultExplorer.attachModule(scienceLab, 3);
-// defaultExplorer.attachModule(warp1, 5);
-// defaultExplorer.attachModule(shieldGenerator, 6);
-// defaultExplorer.attachMount(sensor2, 7);
-// defaultExplorer.attachMount(cannon, 8);
-
-// const defaultCommand = new Ship(frigate);
-// defaultCommand.attachReactor(fission);
-// defaultCommand.attachEngine(ion2);
-// defaultCommand.attachModule(cargoHold, 0);
-// defaultCommand.attachModule(cargoHold, 1);
-// defaultCommand.attachModule(crewQuarters, 2);
-// defaultCommand.attachModule(crewQuarters, 3);
-// defaultCommand.attachModule(jump1, 4);
-// defaultCommand.attachModule(warp1, 5);
-// defaultCommand.attachModule(mineralProcessor, 6);
-// defaultCommand.attachMount(surveyor1, 0);
-// defaultCommand.attachMount(laser1, 1);
-// defaultCommand.attachMount(sensor1, 2);
+  crewCapacity.textContent = `${capacity}`;
+  if (capacity < crewRequired) {
+    crewCapacity.style.color = "#df5337";
+  } else {
+    crewCapacity.style.color = "white";
+  }
+}
+function setFrameImgSrc() {
+  const ship = hangar.getShip();
+  const frame = ship.frame;
+  frameImg.src = `/img/${frame.symbol}.png`;
+}
 
 

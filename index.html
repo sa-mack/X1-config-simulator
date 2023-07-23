@@ -10,13 +10,23 @@
     <div class="main-container">
 <div class="simulation-container">
     <div class="power-and-crew">
-    <p id="reactor-output">POWER OUTPUT: </p>
-    <p id="total-power">POWER CONSUMPTION: </p>
-    <p id="total-crew-capacity">CREW CAPACITY: </p>
-    <p id="total-crew-required">CREW REQUIRED: </p>
+    <p>POWER OUTPUT: <span id="reactor-output"></span></p>
+   <p>POWER NEEDED: <span id="total-power"></span></p>
+    <p>CREW CAPACITY: <span id="total-crew-capacity"></span></p>
+    <p>CREW REQUIRED: <span id="total-crew-required"></span></p>
     </div>
-    <div class="frame-simulation" id="frame-simulation">
-        <img src="" alt="" id="frame-image">
+    <div id="module-effects">
+        <p>CARGO CAPACITY: <span id="cargo-capacity">0</span></p>
+        <p>PAX CAPACITY: <span id="passenger-capacity">0</span> STANDARD / <span id="envoy-capacity">0</span> ENVOYS</p>
+        <p>WARP RANGE: <span id="warp-range"></span></p>
+        <p>JUMP RANGE: <span id="jump-range"></span></p>
+        <p>REFINING TARGETS: <span id="refining-targets">NONE</span></p>
+    </div>
+    <div id="mount-effects">
+        <p>SENSOR STRENGTH: <span id="sensor-strength">0</span></p>
+        <p>MINING STRENGTH: <span id="ore-mining">0</span> ORE / <span id="gas-mining">0</span> GAS</p>
+        <p>SURVEYS PER SCAN: <span id="survey-number">0</span></p>
+        <p>SURVEYABLE DEPOSITS: <span id="survey-deposits">0 / 13</span></p>
     </div>
 </div>
         <div class="ship-container">
@@ -45,12 +55,10 @@
             </div>
         </div>
     <div class="control-panel">
-        <label class="frame-selection" id="frame-label">SELECT FRAME TO BEGIN</label>
         <select id="frame-select"></select>
-    
     </div>
-    
     </div>
+    <img src="" alt="" id="frame-image">
 </body>
 <script type="module" src="main.js"></script>
 </html>

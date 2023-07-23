@@ -1,6 +1,6 @@
 export class Ship {
   constructor(frame) {
-    this.name = frame.symbol + " SHIP"; // You can customize ship names as needed
+    this.name = frame.symbol + " BASE";
     this.frame = frame;
     this.reactor = null;
     this.engine = null;
@@ -21,11 +21,26 @@ export class Ship {
     const mountingPoints = this.frame.mountingPoints;
     let modulesPower = 0;
     let mountsPower = 0;
+
+
+    // for (let i = 0; i < moduleSlots; i++) {
+    //   if (this.modules[i] !== null) {
+    //     modulesPower += this.modules[i].powerRequired;
+    //   }
+    // }
+
     for (let i = 0; i < moduleSlots; i++) {
       if (this.modules[i] !== null) {
+        const slotsReq = this.modules[i].slotsRequired || 1;
         modulesPower += this.modules[i].powerRequired;
+        if (slotsReq > 1) {
+          i = i + (slotsReq - 1); // skip iterations when module takes more than 1 spot
+        }
       }
     }
+    
+
+
       for (let j = 0; j < mountingPoints; j++) {
         if (this.mounts[j] !== null) {
           mountsPower += this.mounts[j].powerRequired;
@@ -44,11 +59,24 @@ export class Ship {
     const mountingPoints = this.frame.mountingPoints;
     let modulesCrew = 0;
     let mountsCrew = 0;
+
+
+
+
+    
+
+
     for (let i = 0; i < moduleSlots; i++) {
       if (this.modules[i] !== null) {
+        const slotsReq = this.modules[i].slotsRequired || 1;
         modulesCrew += this.modules[i].crewRequired;
+        if (slotsReq > 1) {
+          i = i + (slotsReq - 1); // Skip extra iterations for modules occupying multiple slots
+        }
       }
     }
+
+
     for (let j = 0; j < mountingPoints; j++) {
       if (this.mounts[j] !== null) {
         mountsCrew += this.mounts[j].crewRequired;
@@ -62,7 +90,7 @@ export class Ship {
     let totalCrewCapacity = 0;
   
     for (const module of this.modules) {
-      if (module && module.symbol === "MODULE_CREW_QUARTERS_I") {
+      if (module && module.crewCapacity > 0) {
         totalCrewCapacity += module.crewCapacity;
       }
     }
