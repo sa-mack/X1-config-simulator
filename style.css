@@ -38,10 +38,11 @@ body {
   margin-top: 2%;
   margin-left: 20%;
 }
-.deposit-targets {
+.deposit-targets, .refining-targets {
   white-space: pre-wrap;
   columns: 2;
 }
+
 
 .mounts,
 .modules,

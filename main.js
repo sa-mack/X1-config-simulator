@@ -298,14 +298,11 @@ function attachReactorListener(reactorList) {
     const selectedReactor = reactors.find(
       (reactor) => reactor.symbol === selection
     );
-    console.log(selectedReactor);
 
     if (!ship.reactor) {
       ship.attachReactor(selectedReactor);
-      console.log("attached!");
     } else {
       ship.swapReactor(selectedReactor);
-      console.log("swapped!");
     }
     const reactorDetails = getReactorDetails();
     reactorEl.appendChild(reactorDetails);
@@ -323,14 +320,11 @@ function attachEngineListener(engineList) {
     const selectedEngine = engines.find(
       (engine) => engine.symbol === selection
     );
-    console.log(selectedEngine);
 
     if (!ship.engine) {
       ship.attachEngine(selectedEngine);
-      console.log("attached!");
     } else {
       ship.swapEngine(selectedEngine);
-      console.log("swapped!");
     }
     const engineDetails = getEngineDetails();
     engineEl.appendChild(engineDetails);
@@ -368,12 +362,17 @@ function updateMountEffects() {
           depositsLength = mount.deposits.length;
         }
         for (const deposit of mount.deposits) {
-          deposits.push(deposit.replace(/_/g, " "));
+          const noUnderscore = deposit.replace(/_/g, " ");
+          if (!deposits.includes(noUnderscore))
+          {
+          deposits.push(noUnderscore);
+          }
         }
       }
     }
   }
   sensorStrength.textContent = parseInt(sensor);
+
 
 const modules = ship.modules;
 const filteredModules = modules.filter(module => module !== null);
@@ -389,7 +388,7 @@ else {
 
   gasStrength.textContent = parseInt(miningGas);
   surveysProduced.textContent = parseInt(surveys);
-  surveyDeposits.textContent = `${depositsLength} / 14`;
+  surveyDeposits.textContent = `${deposits.length} / 14`;
 
   const depositTargets = document.createElement("div");
   depositTargets.classList.add("deposit-targets");
@@ -399,20 +398,17 @@ else {
   effectsContainer.appendChild(depositTargets);
 }
 function attachMountsListener(mountsList, point) {
-  console.log("point in list", point);
   mountsList.addEventListener("change", function () {
     const existingElements = document.querySelectorAll(`.point-${point}`);
     existingElements.forEach((element) => element.remove());
 
     const ship = hangar.getShip();
-    console.log("the ship", ship);
     const selection = mountsList.value;
 
     if (selection === "") {
 
 
       ship.mounts[point] = null;
-      console.log("removed mount", ship);
 
       updateTotalPower(ship.calculateTotalPower());
       updateCrewRequired(ship.calculateTotalCrewRequired());
@@ -424,7 +420,6 @@ function attachMountsListener(mountsList, point) {
 
     const attached = ship.attachMount(selectedMount, point);
     if (attached) {
-      console.log("attached!");
       const mountDetails = getMountDetails(selectedMount, point);
       mountsList.parentNode.insertBefore(mountDetails, mountsList.nextSibling);
       updateTotalPower(ship.calculateTotalPower());
@@ -440,7 +435,6 @@ function updateModuleEffects() {
   const effectsContainer = document.getElementById("module-effects");
   const ship = hangar.getShip();
   const modules = ship.modules;
-  console.log("SHIP", ship);
   let cargo = 0;
   let passengers = 0;
   let envoys = 0;
@@ -474,7 +468,6 @@ function updateModuleEffects() {
 
     if (modules[i].refiningTargets.length > 0) {
       for (const target of modules[i].refiningTargets) {
-        console.log("target", target);
         refinings.push(target.replace(/_/g, " "));
       }
     }
@@ -488,7 +481,6 @@ function updateModuleEffects() {
   for (const refine of refinings) {
     refiningsContainer.innerHTML += `░ ${refine}<br>`;
   }
-  console.log(refiningsContainer);
   effectsContainer.appendChild(refiningsContainer);
 
 
@@ -541,7 +533,7 @@ function attachModulesListener(modulesList, slot) {
         updateMountEffects();
       } else {
         modulesList.value = "";
-        console.log("needle");
+        // buggy dropdown behavior from here
       }
     }
   });
