@@ -30,19 +30,6 @@ body {
   margin-top: 15%;
 }
 
-/* .frame-container::before {
-  content: "";
-
-  border-radius: 20px;
-  outline: 1px dotted rgb(200, 196, 187);
-  outline-offset: 25px;
-  position: absolute;
-  top: 38%;
-  left: 10%;
-  min-width: 80vw;
-  min-height: 30vh;
-} */
-
 .simulation-container {
   width: 80vw;
   height: 24vh;
@@ -160,7 +147,7 @@ outline-offset: 2px;
   padding-left: 5%;
   padding-top: 5%;
   color: #e3ded6;
-  /* background-color: rgba(0, 0, 0, 0.7); */
+  background-color: rgba(0, 0, 0, 0.7);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   z-index: -1;
@@ -215,7 +202,14 @@ outline-offset: 2px;
   0% {
     opacity: 0.4;
   }
-  50% {
+
+  80% {
+    opacity: 0.4;
+  }
+  80.4% {
+    opacity: 0.3;
+  }
+  80.9% {
     opacity: 0.4;
   }
   90% {
@@ -224,16 +218,16 @@ outline-offset: 2px;
   91% {
     opacity: 0.3;
   }
-  92% {
+  91.6% {
     opacity: 0.4;
   }
   98% {
     opacity: 0.4;
   }
-  99% {
-    opacity: 0.6;
+  98.5% {
+    opacity: 0.55;
   }
-  100% {
+  99% {
     opacity: 0.4;
   }
 }

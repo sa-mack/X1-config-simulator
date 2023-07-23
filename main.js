@@ -119,10 +119,10 @@ function getFrameDetails() {
   frameDetails.classList.add("frame-details");
   const frameSpecs = document.createElement("p");
   frameSpecs.innerHTML =
-    "POWER REQ: " +
+    "POWER REQUIRED: " +
     ship.frame.powerRequired +
     "<br>" +
-    "CREW REQ: " +
+    "CREW REQUIRED: " +
     ship.frame.crewRequired +
     "<br>" +
     "FUEL CAPACITY: " +
@@ -164,16 +164,6 @@ function handleFrameSelection() {
   updateCrewRequired(ship.calculateTotalCrewRequired());
   setFrameImgSrc();
 
-  //   const REACTOR_FISSION = reactors.find(
-  //     (reactor) => reactor.symbol === "REACTOR_FISSION_I"
-  //   );
-  //   const ENGINE_ION_DRIVE_I = engines.find(
-  //     (engine) => engine.symbol === "ENGINE_ION_DRIVE_I"
-  //   );
-  //   ship.attachReactor(REACTOR_FISSION);
-  //   ship.attachEngine(ENGINE_ION_DRIVE_I);
-
-  // populate reactor list
   const reactorOptions = populateReactors();
   reactorEl.innerHTML = "";
   reactorEl.appendChild(reactorOptions);
@@ -183,7 +173,6 @@ function handleFrameSelection() {
   }
   attachReactorListener(reactorOptions);
 
-  // populate engine list
   const engineOptions = populateEngines();
   engineEl.innerHTML = "";
   engineEl.appendChild(engineOptions);
@@ -229,7 +218,7 @@ function getReactorDetails() {
     "POWER OUTPUT: " +
     ship.reactor.powerOutput +
     "<br>" +
-    "CREW REQ: " +
+    "CREW REQUIRED: " +
     ship.reactor.crewRequired +
     "<br>";
   reactorDetails.appendChild(reactorSpecs);
@@ -247,10 +236,10 @@ function getEngineDetails() {
 
   const engineSpecs = document.createElement("p");
   engineSpecs.innerHTML =
-    "POWER REQ: " +
+    "POWER REQUIRED: " +
     ship.engine.powerRequired +
     "<br>" +
-    "CREW REQ: " +
+    "CREW REQUIRED: " +
     ship.engine.crewRequired +
     "<br>";
   engineDetails.appendChild(engineSpecs);
@@ -394,7 +383,7 @@ if (mineralProcessor || miningOre == 0) {
   oreStrength.style.color = "#f4eee3";
 }
 else {
-  oreStrength.textContent = "[EQUIP MINERAL PROCESSOR]";
+  oreStrength.textContent = "[NO MINERAL PROCESSOR]";
   oreStrength.style.color = "#df5337";
 }
 

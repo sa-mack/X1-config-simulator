@@ -13,40 +13,30 @@ export class Ship {
   }
 
   calculateTotalPower() {
+
     const enginePower = this.engine ? this.engine.powerRequired : 0;
     const framePower = this.frame ? this.frame.powerRequired : 0;
-    console.log("genny", enginePower);
-
     const moduleSlots = this.frame.moduleSlots;
     const mountingPoints = this.frame.mountingPoints;
     let modulesPower = 0;
     let mountsPower = 0;
 
 
-    // for (let i = 0; i < moduleSlots; i++) {
-    //   if (this.modules[i] !== null) {
-    //     modulesPower += this.modules[i].powerRequired;
-    //   }
-    // }
-
     for (let i = 0; i < moduleSlots; i++) {
       if (this.modules[i] !== null) {
         const slotsReq = this.modules[i].slotsRequired || 1;
         modulesPower += this.modules[i].powerRequired;
         if (slotsReq > 1) {
-          i = i + (slotsReq - 1); // skip iterations when module takes more than 1 spot
+          i = i + (slotsReq - 1);
         }
       }
     }
-    
-
 
       for (let j = 0; j < mountingPoints; j++) {
         if (this.mounts[j] !== null) {
           mountsPower += this.mounts[j].powerRequired;
         }
       }
-
     const total =  enginePower + framePower + modulesPower + mountsPower;
     return total;
   }
@@ -60,18 +50,12 @@ export class Ship {
     let modulesCrew = 0;
     let mountsCrew = 0;
 
-
-
-
-    
-
-
     for (let i = 0; i < moduleSlots; i++) {
       if (this.modules[i] !== null) {
         const slotsReq = this.modules[i].slotsRequired || 1;
         modulesCrew += this.modules[i].crewRequired;
         if (slotsReq > 1) {
-          i = i + (slotsReq - 1); // Skip extra iterations for modules occupying multiple slots
+          i = i + (slotsReq - 1);
         }
       }
     }
@@ -122,31 +106,13 @@ export class Ship {
     }
   }
 
-  // attachModule(module) {
-  //   if (this.modules.length < this.frame.moduleSlots) {
-  //     const potentialPower = this.calculateTotalPower() + module.powerRequired;
-  //     if (potentialPower <= this.reactor.powerOutput) {
-  //       this.modules.push(module);
-  //     } else {
-  //       console.log("Adding this module will exceed the power limits.");
-  //     }
-  //   } else {
-  //     console.log("No more module slots available.");
-  //   }
-  // }
 
   attachModule(module, slot) {
     if (slot >= 0 && slot < this.frame.moduleSlots) {
       if (this.modules[slot] === null) {
         const slotsNeeded = module.slotsRequired;
         if (this.checkSlotsAvailable(slot, slotsNeeded)) {
-          // const potentialPower =
-          //   this.calculateTotalPower() + module.powerRequired;
-          // if (potentialPower <= this.reactor.powerOutput) {
-          //   console.log("good attach", potentialPower);
-          // } else {
-          //   console.log("Adding this module will exceed the power limits. ATTACHED ANYWAY");
-          // }
+
           for (let i = 0; i < slotsNeeded; i++) {
             this.modules[slot + i] = module;
           }
@@ -160,7 +126,6 @@ export class Ship {
         console.log("Slot is already occupied.");
 
       }
-
     } else {
       console.log("Invalid slot number.");
     }
@@ -178,12 +143,7 @@ export class Ship {
 
   attachMount(mount, point) {
     if (point >= 0 && point < this.frame.mountingPoints) {
-      // const potentialPower = this.calculateTotalPower() + mount.powerRequired;
-      // if (potentialPower <= this.reactor.powerOutput) {
-      //   console.log("good attach");
-      // } else {
-      //   console.log("OVER POWER LIMIT BUT WE DO IT ANYWAY");
-      // }
+
       this.mounts[point] = mount;
       const newPower = this.calculateTotalPower();
       console.log("Mount attached.", newPower);
