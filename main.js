@@ -596,7 +596,7 @@ function updateCrewCapacity(capacity) {
 function setFrameImgSrc() {
   const ship = hangar.getShip();
   const frame = ship.frame;
-  frameImg.src = `/img/${frame.symbol}.png`;
+  frameImg.src = `img/${frame.symbol}.png`;
 }
 
 
