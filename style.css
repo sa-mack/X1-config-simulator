@@ -102,8 +102,8 @@ select {
 
 button {
   font-family: "Share Tech Mono";
-  background-color: #282828;
-  color: #f4eee3;
+  background-color: #ceccc9;
+  color: #000;
   border: none;
   outline: 1px dotted #4f4f4f;
   outline-offset: 1px;

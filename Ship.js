@@ -107,28 +107,25 @@ export class Ship {
   }
 
 
-  attachModule(module, slot) {
-    if (slot >= 0 && slot < this.frame.moduleSlots) {
-      if (this.modules[slot] === null) {
-        const slotsNeeded = module.slotsRequired;
-        if (this.checkSlotsAvailable(slot, slotsNeeded)) {
 
-          for (let i = 0; i < slotsNeeded; i++) {
-            this.modules[slot + i] = module;
-          }
-          const newPower = this.calculateTotalPower();
-          console.log("Module attached.", newPower);
-          return true;
-        } else {
-          console.log("Not enough contiguous slots available.");
-        }
-      } else {
-        console.log("Slot is already occupied.");
 
+  attachModule (module) {
+    let numOccupied = 0;
+    for (let module of this.modules) {
+      
+      if (module !== null) {
+        numOccupied += module.slotsRequired;
       }
-    } else {
-      console.log("Invalid slot number.");
     }
+    console.log("occupied slots", numOccupied)
+    if (numOccupied + module.slotsRequired <= this.frame.moduleSlots) {
+      this.modules.push(module);
+      console.log("SUCCESS");
+      console.log(this.modules);
+      return true;
+    }
+    console.log("NO ROOM");
+    console.log("slots remaining:", this.frame.moduleSlots - numOccupied);
     return false;
   }
 
@@ -158,8 +155,10 @@ export class Ship {
     const index = this.modules.indexOf(module);
     if (index !== -1) {
       this.modules.splice(index, 1);
+      return true;
     } else {
       console.log("Module not found on the ship.");
+      return false;
     }
   }
 
@@ -171,5 +170,73 @@ export class Ship {
       console.log("Mount not found on the ship.");
     }
   }
+
+  // outputJSON () {
+  //   const mods = this.modules;
+  //   let modsArr = [];
+  //   for (let i = 0; i < mods.length; i++) {
+  //     if (this.modules[i] !== null) {
+  //       modsArr.push(this.modules[i]);
+        
+  //       const slotsReq = this.modules[i].slotsRequired || 1;
+  //       if (slotsReq > 1) {
+  //         i = i + (slotsReq - 1);
+
+  //       }
+  //     }
+  //   }
+  //   console.log("MODSSSSS", modsArr);
+
+  //   for (let m of mods) {
+  //     if (m.range > 0) {
+  //       const newRange = m.range;
+  //     }
+  //   }
+  //   const newmodsArr = modsArr.map((mod) => {
+  //     return {
+  //       condition: 100,
+
+  //     }
+  //   });
+
+
+
+  //   return JSON.stringify({
+  //       engine: {
+  //         condition: 100,
+  //         description: this.engine.description,
+  //         name: this.engine.name,
+  //         requirements: {
+  //           crew: this.engine.crewRequired,
+  //           power: this.engine.powerRequired
+  //         },
+  //         speed: this.engine.speed,
+  //         symbol: this.engine.symbol
+  //       },
+  //       frame: {
+  //         condition: 100,
+  //         description: this.frame.description,
+  //         fuelCapacity: this.frame.fuelCapacity,
+  //         moduleSlots: this.frame.moduleSlots,
+  //         mountingPoints: this.frame.mountingPoints,
+  //         name: this.frame.frameName,
+  //         requirements: {
+  //           crew: this.frame.crewRequired,
+  //           power: this.frame.powerRequired
+  //         },
+  //         symbol: this.frame.symbol
+  //       },
+  //       // modules: this.modules.map((module) => {
+  //       //   if (module !== null) {
+  //       //     return {
+
+  //       //     }
+  //       //   }
+  //       // }),
+
+  //     });
+    
+  // }
 }
+
 

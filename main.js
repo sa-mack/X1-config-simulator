@@ -39,28 +39,29 @@ const hangar = {
   },
 };
 
-function populateModules(moduleSlot) {
+function populateModules() {
   const modulesList = document.createElement("select");
-  modulesList.classList.add(`moduleSelect-${moduleSlot}`);
+  modulesList.classList.add(`module-select`);
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[    ]";
+  empty.text = "";
   modulesList.appendChild(empty);
+
   for (const module of modules) {
     const option = document.createElement("option");
     option.value = module.symbol;
     option.text = `${module.moduleName} [ ${module.slotsRequired} ]`;
     modulesList.appendChild(option);
   }
-
   return modulesList;
 }
+
 function populateMounts(mountingPoint) {
   const mountsList = document.createElement("select");
   mountsList.classList.add(`mountSelect-${mountingPoint}`);
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[    ]";
+  empty.text = "";
   mountsList.appendChild(empty);
   for (const mount of mounts) {
     const option = document.createElement("option");
@@ -182,17 +183,23 @@ function handleFrameSelection() {
   }
   attachEngineListener(engineOptions);
 
-  // populate module lists []
+
   moduleEl.innerHTML = "";
   const slots = selectedFrame.moduleSlots;
-  for (let i = 0; i < slots; i++) {
-    const moduleOptions = populateModules(i);
+  const slotCount = document.createElement("p");
+  slotCount.classList.add("slot-count");
+  slotCount.innerHTML = `SLOTS REMAINING: ${slots}` + "<br>" + "--------";
+  moduleEl.appendChild(slotCount);
+
+    const moduleOptions = populateModules();
     moduleEl.appendChild(moduleOptions);
-    // removed cause no module to pass .
-    // const moduleDetails = getModuleDetails([SELECTED MOD]i);
-    // moduleEl.appendChild(moduleDetails);
-    attachModulesListener(moduleOptions, i);
-  }
+    attachModulesListener(moduleOptions);
+  
+
+
+
+
+
 
   //populate mount lists []
   mountEl.innerHTML = "";
@@ -249,21 +256,96 @@ function getEngineDetails() {
   engineDetails.appendChild(engineDesc);
   return engineDetails;
 }
-function getModuleDetails(selectedMod, slot) {
-  // const ship = hangar.getShip();
-  // const selectedMod = ship.modules[slot];
+
+
+function getModuleDetails(selectedMod) {
 
   const moduleDetails = document.createElement("div");
   moduleDetails.classList.add(`module-details`);
-  moduleDetails.classList.add(`slot-${slot}`);
 
   moduleDetails.innerHTML =
-    `PWR[${selectedMod.powerRequired}]` +
-    `CREW[${selectedMod.crewRequired}]` +
-    `SLOTS[${selectedMod.slotsRequired}]`;
+  `MODULE: ${selectedMod.moduleName}` + "<br>" +
+  `SLOTS [${selectedMod.slotsRequired}] ` +
+    `PWR [${selectedMod.powerRequired}] ` +
+    `CREW [${selectedMod.crewRequired}] ` + "<br> <br>" +
+    `${selectedMod.description}` + "<br>";
+
+  const addBtn = document.createElement("button");
+
+  addBtn.classList.add("add-module-btn");
+  addBtn.textContent = "[ATTACH]";
+
+  addBtn.addEventListener("click", function () {
+
+    const ship = hangar.getShip();
+
+
+      const attached = ship.attachModule(selectedMod);
+
+      if (attached) {
+        const modulesList = document.querySelector(".module-select");
+        modulesList.value = "";
+
+        moduleDetails.remove();
+
+
+        
+        const slottedEl = document.createElement("div");
+        slottedEl.classList.add("slotted-module");
+        slottedEl.classList.add(`${selectedMod.symbol}`);
+        slottedEl.innerHTML = `${selectedMod.moduleName} `;
+
+        const rmBtn = document.createElement("button");
+        rmBtn.classList.add("remove-module-btn");
+        rmBtn.textContent = "[DETACH]";
+        rmBtn.addEventListener("click", function () {
+          const removed = ship.removeModule(selectedMod);
+          if (removed) {
+
+          slottedEl.remove();
+          updateSlotsRemaining();
+          updateTotalPower(ship.calculateTotalPower());
+          updateCrewRequired(ship.calculateTotalCrewRequired());
+          updateCrewCapacity(ship.calculateTotalCrewCapacity());
+          updateModuleEffects();
+          updateMountEffects();
+          }
+          else {
+            console.log(removed);
+          }
+        });
+        slottedEl.appendChild(rmBtn);
+        
+
+        moduleEl.insertBefore(slottedEl, modulesList);
+
+
+
+
+
+        // moduleEl.appendChild(slottedEl);
+
+        //update slots remaining
+        updateSlotsRemaining();
+
+        updateTotalPower(ship.calculateTotalPower());
+        updateCrewRequired(ship.calculateTotalCrewRequired());
+        updateCrewCapacity(ship.calculateTotalCrewCapacity());
+        updateModuleEffects();
+        updateMountEffects();
+      }
+      else {
+        alert("NOT ENOUGH SLOTS!");
+
+      }
+    
+  });
+
+  moduleDetails.appendChild(addBtn);
 
   return moduleDetails;
 }
+
 function getMountDetails(selectedMount, point) {
   const mountDetails = document.createElement("div");
   mountDetails.classList.add(`mount-details`);
@@ -280,6 +362,24 @@ function resetSimulation() {
   moduleEl.innerHTML = "";
   mountEl.innerHTML = "";
   hangar.resetShip();
+}
+
+function updateSlotsRemaining () {
+  const ship = hangar.getShip();
+  const modules = ship.modules;
+  const slots = ship.frame.moduleSlots;
+  let slotsOccupied = 0;
+  console.log(modules);
+  for (let mod of modules) {
+    if (mod !== null) {
+      slotsOccupied += mod.slotsRequired;
+    }
+  }
+  console.log("REMAINING, FROM UPDATESLOTREM", slots - slotsOccupied);
+
+  const slotCount = document.querySelector(".slot-count");
+  slotCount.textContent = `SLOTS REMAINING: ${slots - slotsOccupied}`;
+
 }
 
 frameList.addEventListener("change", handleFrameSelection);
@@ -363,9 +463,8 @@ function updateMountEffects() {
         }
         for (const deposit of mount.deposits) {
           const noUnderscore = deposit.replace(/_/g, " ");
-          if (!deposits.includes(noUnderscore))
-          {
-          deposits.push(noUnderscore);
+          if (!deposits.includes(noUnderscore)) {
+            deposits.push(noUnderscore);
           }
         }
       }
@@ -373,18 +472,18 @@ function updateMountEffects() {
   }
   sensorStrength.textContent = parseInt(sensor);
 
-
-const modules = ship.modules;
-const filteredModules = modules.filter(module => module !== null);
-const mineralProcessor = filteredModules.find(module => module.symbol === "MODULE_MINERAL_PROCESSOR_I");
-if (mineralProcessor || miningOre == 0) {
-  oreStrength.textContent = parseInt(miningOre);
-  oreStrength.style.color = "#f4eee3";
-}
-else {
-  oreStrength.textContent = "[NO MINERAL PROCESSOR]";
-  oreStrength.style.color = "#df5337";
-}
+  const modules = ship.modules;
+  const filteredModules = modules.filter((module) => module !== null);
+  const mineralProcessor = filteredModules.find(
+    (module) => module.symbol === "MODULE_MINERAL_PROCESSOR_I"
+  );
+  if (mineralProcessor || miningOre == 0) {
+    oreStrength.textContent = parseInt(miningOre);
+    oreStrength.style.color = "#f4eee3";
+  } else {
+    oreStrength.textContent = "[NO MINERAL PROCESSOR]";
+    oreStrength.style.color = "#df5337";
+  }
 
   gasStrength.textContent = parseInt(miningGas);
   surveysProduced.textContent = parseInt(surveys);
@@ -406,8 +505,6 @@ function attachMountsListener(mountsList, point) {
     const selection = mountsList.value;
 
     if (selection === "") {
-
-
       ship.mounts[point] = null;
 
       updateTotalPower(ship.calculateTotalPower());
@@ -416,24 +513,30 @@ function attachMountsListener(mountsList, point) {
       updateMountEffects();
       updateModuleEffects();
     } else {
-    const selectedMount = mounts.find((mount) => mount.symbol === selection);
+      const selectedMount = mounts.find((mount) => mount.symbol === selection);
 
-    const attached = ship.attachMount(selectedMount, point);
-    if (attached) {
-      const mountDetails = getMountDetails(selectedMount, point);
-      mountsList.parentNode.insertBefore(mountDetails, mountsList.nextSibling);
-      updateTotalPower(ship.calculateTotalPower());
-      updateCrewRequired(ship.calculateTotalCrewRequired());
-      updateMountEffects();
-      updateModuleEffects();
-    }}
+      const attached = ship.attachMount(selectedMount, point);
+      if (attached) {
+        const mountDetails = getMountDetails(selectedMount, point);
+        mountsList.parentNode.insertBefore(
+          mountDetails,
+          mountsList.nextSibling
+        );
+        updateTotalPower(ship.calculateTotalPower());
+        updateCrewRequired(ship.calculateTotalCrewRequired());
+        updateMountEffects();
+        updateModuleEffects();
+      }
+    }
   });
 }
+
 function updateModuleEffects() {
   const existing = document.querySelectorAll(".refining-targets");
   existing.forEach((element) => element.remove());
   const effectsContainer = document.getElementById("module-effects");
   const ship = hangar.getShip();
+
   const modules = ship.modules;
   let cargo = 0;
   let passengers = 0;
@@ -448,16 +551,9 @@ function updateModuleEffects() {
   jumpRange.innerHTML = "";
   refiningTargets.innerHTML = "";
 
-  let currentSlot = 0;
   for (let i = 0; i < modules.length; i++) {
     if (modules[i] == null) {
-      currentSlot++;
       continue;
-    }
-
-    const slotsReq = modules[i].slotsRequired;
-    if (slotsReq > 1) {
-      i = i + (slotsReq - 1);
     }
 
     cargo += parseInt(modules[i].cargoCapacity) || 0;
@@ -471,9 +567,7 @@ function updateModuleEffects() {
         refinings.push(target.replace(/_/g, " "));
       }
     }
-    if (i < currentSlot) {
-      i = currentSlot;
-    }
+
   }
 
   const refiningsContainer = document.createElement("div");
@@ -483,10 +577,6 @@ function updateModuleEffects() {
   }
   effectsContainer.appendChild(refiningsContainer);
 
-
-
-
-  
   cargoCapacity.textContent = parseInt(cargo);
   passengerCapacity.textContent = parseInt(passengers);
   envoyCapacity.textContent = parseInt(envoys);
@@ -494,47 +584,44 @@ function updateModuleEffects() {
   jumpRange.textContent = parseInt(jump);
 }
 
-function attachModulesListener(modulesList, slot) {
+
+
+function attachModulesListener(modulesList) {
   modulesList.addEventListener("change", function () {
-    const existingElements = document.querySelectorAll(`.slot-${slot}`);
-    existingElements.forEach((element) => element.remove());
+
+    const existing = document.querySelectorAll(".module-details");
+    existing.forEach((element) => element.remove());
+
 
     const ship = hangar.getShip();
 
     const selection = modulesList.value;
     if (selection === "") {
-      const currentModule = ship.modules[slot];
-      const slotsReq = currentModule.slotsRequired;
-      for (let i = 0; i < slotsReq; i++) {
-        ship.modules[slot + i] = null;
-      }
-      updateTotalPower(ship.calculateTotalPower());
-      updateCrewRequired(ship.calculateTotalCrewRequired());
-      updateCrewCapacity(ship.calculateTotalCrewCapacity());
-      updateModuleEffects();
-      updateMountEffects();
+      // //remove the future div
+
+      // // here
+
+      // const currentModule = ship.modules[slot];
+      // const slotsReq = currentModule.slotsRequired;
+      // for (let i = 0; i < slotsReq; i++) {
+      //   ship.modules[slot + i] = null;
+      //   modulesList.value = "";
+      // }
+      // updateTotalPower(ship.calculateTotalPower());
+      // updateCrewRequired(ship.calculateTotalCrewRequired());
+      // updateCrewCapacity(ship.calculateTotalCrewCapacity());
+      // updateModuleEffects();
+      // updateMountEffects();
     } else {
+
+
       const selectedModule = modules.find(
         (module) => module.symbol === selection
       );
 
-      const attached = ship.attachModule(selectedModule, slot);
+      const moduleDetails = getModuleDetails(selectedModule);
+      moduleEl.appendChild(moduleDetails);
 
-      if (attached) {
-        const moduleDetails = getModuleDetails(selectedModule, slot);
-        modulesList.parentNode.insertBefore(
-          moduleDetails,
-          modulesList.nextSibling
-        );
-        updateTotalPower(ship.calculateTotalPower());
-        updateCrewRequired(ship.calculateTotalCrewRequired());
-        updateCrewCapacity(ship.calculateTotalCrewCapacity());
-        updateModuleEffects();
-        updateMountEffects();
-      } else {
-        modulesList.value = "";
-        // buggy dropdown behavior from here
-      }
     }
   });
 }
@@ -590,5 +677,7 @@ function setFrameImgSrc() {
   const frame = ship.frame;
   frameImg.src = `img/${frame.symbol}.png`;
 }
+
+
 
 
