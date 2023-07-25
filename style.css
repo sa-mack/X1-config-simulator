@@ -21,7 +21,7 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   margin: 1%;
-  margin-top: 2%;
+  /* margin-top: 2%; */
   width: 80vw;
 }
 
@@ -36,7 +36,8 @@ body {
   display: flex;
   justify-content: space-evenly;
   margin-top: 2%;
-  margin-left: 20%;
+  margin-right: 5%; 
+  /* margin-left: 35%; */
 }
 .deposit-targets, .refining-targets {
   white-space: pre-wrap;
@@ -56,7 +57,7 @@ body {
   background-color: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(2px);
   min-height: 30vh;
-  max-height: 30vh;
+  max-height: 40vh;
   text-align: center;
   width: 15.5vw;
   padding-top: 5%;
@@ -71,7 +72,6 @@ body {
 
 select {
   appearance: none;
-  outline: dotted #f4eee3 1px;
   outline-offset: 2px;
   border-radius: 5px;
   border: 0;
@@ -83,20 +83,24 @@ select {
   background-color: rgba(247, 244, 239, 0.75);
   background-image: none;
   cursor: pointer;
-  font-family: "Roboto Condensed", monospace;
+  font-family: "Share Tech Mono", monospace;
   text-transform: uppercase;
 }
 #frame-select {
-  margin-top: 10%;
+  margin-top: 20%;
   font-size: 1.5rem;
   padding: 2%;
   width: 30vw;
   text-align: center;
   font-family: "Share Tech Mono", monospace;
+  outline: dotted 1px #f4eee3;
+  outline-offset: 0px;
+  transition: outline-offset 0.3s ease;
 }
 #frame-select:hover {
   background-color: rgba(51, 48, 48, 0.7);
   color: #f4eee3;
+  outline-offset: 4px;
   cursor: crosshair;
 }
 
@@ -117,15 +121,13 @@ button {
 }
 
 button:hover {
-  background-color: #4a4a4a;
+  background-color: #242424;
+  color: #f4eee3;
   outline: 1.5px dotted #9c9c9c;
   outline-offset: 3px;
   cursor: crosshair;
 }
 
-.control-panel {
-  text-align: center;
-}
 
 .power-and-crew {
   font-size: 1.15em;
@@ -135,7 +137,7 @@ button:hover {
   padding: 2%;
   outline: dotted #f4eee3 1px;
 outline-offset: 2px;
-  width: 12vw;
+  /* width: 12vw; */
 }
 
 .effects {
@@ -170,6 +172,12 @@ outline-offset: 2px;
 .engine-details {
   text-align: left;
   padding-left: 5%;
+}
+
+.slot-count {
+  font-size: 1.15em;
+  font-weight: bold;
+  color: #e3ded6;
 }
 
 @keyframes blur-in {
@@ -232,4 +240,22 @@ outline-offset: 2px;
     opacity: 0.4;
   }
 }
+@media screen and (max-width: 768px) {
+  .ship-container {
+    flex-direction: column;
+  }
 
+  .mounts,
+  .modules,
+  .engine,
+  .reactor,
+  .frame {
+    width: 80vw;
+  }
+
+  .simulation-container {
+    margin: 5%;
+    justify-content: space-evenly;
+  }
+
+}

@@ -41,10 +41,10 @@ const hangar = {
 
 function populateModules() {
   const modulesList = document.createElement("select");
-  modulesList.classList.add(`module-select`);
+  modulesList.classList.add("module-select");
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "";
+  empty.text = "SELECT MODULE";
   modulesList.appendChild(empty);
 
   for (const module of modules) {
@@ -61,7 +61,7 @@ function populateMounts(mountingPoint) {
   mountsList.classList.add(`mountSelect-${mountingPoint}`);
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "";
+  empty.text = "SELECT MOUNT";
   mountsList.appendChild(empty);
   for (const mount of mounts) {
     const option = document.createElement("option");
@@ -88,7 +88,7 @@ function populateReactors() {
   const reactorList = document.createElement("select");
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[NO REACTOR]";
+  empty.text = "SELECT REACTOR";
   reactorList.appendChild(empty);
   for (const reactor of reactors) {
     const option = document.createElement("option");
@@ -102,7 +102,7 @@ function populateEngines() {
   const engineList = document.createElement("select");
   const empty = document.createElement("option");
   empty.value = "";
-  empty.text = "[NO ENGINE]";
+  empty.text = "SELECT ENGINE";
   engineList.appendChild(empty);
   for (const engine of engines) {
     const option = document.createElement("option");
@@ -188,7 +188,7 @@ function handleFrameSelection() {
   const slots = selectedFrame.moduleSlots;
   const slotCount = document.createElement("p");
   slotCount.classList.add("slot-count");
-  slotCount.innerHTML = `SLOTS REMAINING: ${slots}` + "<br>" + "--------";
+  slotCount.innerHTML = `SLOTS REMAINING: ${slots}` + "<br>";
   moduleEl.appendChild(slotCount);
 
     const moduleOptions = populateModules();
@@ -248,7 +248,8 @@ function getEngineDetails() {
     "<br>" +
     "CREW REQUIRED: " +
     ship.engine.crewRequired +
-    "<br>";
+    "<br>" +
+    "SPEED: " + ship.engine.speed;
   engineDetails.appendChild(engineSpecs);
   const engineDesc = document.createElement("p");
   // engineDesc.classList.add("engine-details");
@@ -273,7 +274,7 @@ function getModuleDetails(selectedMod) {
   const addBtn = document.createElement("button");
 
   addBtn.classList.add("add-module-btn");
-  addBtn.textContent = "[ATTACH]";
+  addBtn.textContent = "[ ATTACH ]";
 
   addBtn.addEventListener("click", function () {
 
@@ -297,7 +298,7 @@ function getModuleDetails(selectedMod) {
 
         const rmBtn = document.createElement("button");
         rmBtn.classList.add("remove-module-btn");
-        rmBtn.textContent = "[DETACH]";
+        rmBtn.textContent = "[ DETACH ]";
         rmBtn.addEventListener("click", function () {
           const removed = ship.removeModule(selectedMod);
           if (removed) {
@@ -369,14 +370,18 @@ function updateSlotsRemaining () {
   const modules = ship.modules;
   const slots = ship.frame.moduleSlots;
   let slotsOccupied = 0;
-  console.log(modules);
   for (let mod of modules) {
     if (mod !== null) {
       slotsOccupied += mod.slotsRequired;
     }
   }
-  console.log("REMAINING, FROM UPDATESLOTREM", slots - slotsOccupied);
-
+  const modulesList = document.querySelector(".module-select");
+  if (slots - slotsOccupied === 0){
+    modulesList.style.display = "none";
+  }
+  else {
+    modulesList.style.display = "block";
+  }
   const slotCount = document.querySelector(".slot-count");
   slotCount.textContent = `SLOTS REMAINING: ${slots - slotsOccupied}`;
 
@@ -564,7 +569,10 @@ function updateModuleEffects() {
 
     if (modules[i].refiningTargets.length > 0) {
       for (const target of modules[i].refiningTargets) {
-        refinings.push(target.replace(/_/g, " "));
+        const formatted = target.replace(/_/g, " ");
+        if (!refinings.includes(formatted)) {
+          refinings.push(formatted);
+        }
       }
     }
 
@@ -573,7 +581,7 @@ function updateModuleEffects() {
   const refiningsContainer = document.createElement("div");
   refiningsContainer.classList.add("refining-targets");
   for (const refine of refinings) {
-    refiningsContainer.innerHTML += `░ ${refine}<br>`;
+    refiningsContainer.innerHTML += `░ ${refine} <br>`;
   }
   effectsContainer.appendChild(refiningsContainer);
 
@@ -592,37 +600,13 @@ function attachModulesListener(modulesList) {
     const existing = document.querySelectorAll(".module-details");
     existing.forEach((element) => element.remove());
 
-
-    const ship = hangar.getShip();
-
     const selection = modulesList.value;
-    if (selection === "") {
-      // //remove the future div
-
-      // // here
-
-      // const currentModule = ship.modules[slot];
-      // const slotsReq = currentModule.slotsRequired;
-      // for (let i = 0; i < slotsReq; i++) {
-      //   ship.modules[slot + i] = null;
-      //   modulesList.value = "";
-      // }
-      // updateTotalPower(ship.calculateTotalPower());
-      // updateCrewRequired(ship.calculateTotalCrewRequired());
-      // updateCrewCapacity(ship.calculateTotalCrewCapacity());
-      // updateModuleEffects();
-      // updateMountEffects();
-    } else {
-
-
       const selectedModule = modules.find(
         (module) => module.symbol === selection
       );
-
       const moduleDetails = getModuleDetails(selectedModule);
       moduleEl.appendChild(moduleDetails);
-
-    }
+    
   });
 }
 
@@ -660,7 +644,6 @@ function updateCrewRequired(crew) {
     crewRequired.style.color = "white";
   }
 }
-
 function updateCrewCapacity(capacity) {
   const ship = hangar.getShip();
   const crewRequired = ship.calculateTotalCrewRequired();
@@ -677,7 +660,3 @@ function setFrameImgSrc() {
   const frame = ship.frame;
   frameImg.src = `img/${frame.symbol}.png`;
 }
-
-
-
-

@@ -4,7 +4,7 @@ export class Ship {
     this.frame = frame;
     this.reactor = null;
     this.engine = null;
-    this.modules = new Array(frame.moduleSlots).fill(null);
+    this.modules = []
     this.mounts = new Array(frame.mountingPoints).fill(null);
   }
 
@@ -22,13 +22,12 @@ export class Ship {
     let mountsPower = 0;
 
 
-    for (let i = 0; i < moduleSlots; i++) {
+    for (let i = 0; i < this.modules.length; i++) {
+
+
       if (this.modules[i] !== null) {
-        const slotsReq = this.modules[i].slotsRequired || 1;
         modulesPower += this.modules[i].powerRequired;
-        if (slotsReq > 1) {
-          i = i + (slotsReq - 1);
-        }
+
       }
     }
 
@@ -45,18 +44,13 @@ export class Ship {
     const reactorCrew = this.reactor ? this.reactor.crewRequired : 0;
     const engineCrew = this.engine ? this.engine.crewRequired : 0;
     const frameCrew = this.frame ? this.frame.crewRequired : 0;
-    const moduleSlots = this.frame.moduleSlots;
     const mountingPoints = this.frame.mountingPoints;
     let modulesCrew = 0;
     let mountsCrew = 0;
 
-    for (let i = 0; i < moduleSlots; i++) {
-      if (this.modules[i] !== null) {
-        const slotsReq = this.modules[i].slotsRequired || 1;
-        modulesCrew += this.modules[i].crewRequired;
-        if (slotsReq > 1) {
-          i = i + (slotsReq - 1);
-        }
+    for (let k = 0; k < this.modules.length; k++) {
+      if (this.modules[k] !== null) {
+        modulesCrew += this.modules[k].crewRequired;
       }
     }
 
@@ -117,15 +111,10 @@ export class Ship {
         numOccupied += module.slotsRequired;
       }
     }
-    console.log("occupied slots", numOccupied)
     if (numOccupied + module.slotsRequired <= this.frame.moduleSlots) {
       this.modules.push(module);
-      console.log("SUCCESS");
-      console.log(this.modules);
       return true;
     }
-    console.log("NO ROOM");
-    console.log("slots remaining:", this.frame.moduleSlots - numOccupied);
     return false;
   }
 
@@ -142,11 +131,7 @@ export class Ship {
     if (point >= 0 && point < this.frame.mountingPoints) {
 
       this.mounts[point] = mount;
-      const newPower = this.calculateTotalPower();
-      console.log("Mount attached.", newPower);
       return true;
-    } else {
-      console.log("Invalid mounting point index.");
     }
     return false;
   }
@@ -185,8 +170,6 @@ export class Ship {
   //       }
   //     }
   //   }
-  //   console.log("MODSSSSS", modsArr);
-
   //   for (let m of mods) {
   //     if (m.range > 0) {
   //       const newRange = m.range;
